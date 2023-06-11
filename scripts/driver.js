@@ -25,7 +25,7 @@ MySample.main = (function() {
         0, 0, 1, -3,
         0, 0, 0, 1
     ]);
-    //Testing hello
+
     let translate2 = new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
