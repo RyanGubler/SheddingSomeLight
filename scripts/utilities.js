@@ -5,10 +5,12 @@
 // Helper function used to load a file from the server
 //
 //------------------------------------------------------------------
-function loadFileFromServer(filename) {
-    return fetch(filename)
-        .then(res => res.text());
+async function loadFileFromServer(filename) {
+    const res = await fetch(filename);
+    return await res.text();
 }
+
+
 
 //------------------------------------------------------------------
 //
