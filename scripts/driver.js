@@ -5,12 +5,12 @@ MySample.main = (function() {
     let previousTime = performance.now();
     let indices = [];
     let vertices = [];
-    let normals = [0, 0,];
-    let result = [];
+    let normals = [0, 0, 1];
+    let triangles = [];
     let view = new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, -.3,
+        0, 0, 1, 0,
         0, 0, 0, 1
     ]);
     let right = 3;
@@ -22,13 +22,13 @@ MySample.main = (function() {
     let translate1 = new Float32Array ([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, -3,
+        0, 0, 1, -1,
         0, 0, 0, 1
     ]);
     let translate2 = new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, 3,
+        0, 0, 1, 1,
         0, 0, 0, 1
     ]);
     let perspectiveProjection = new Float32Array([
@@ -105,9 +105,14 @@ MySample.main = (function() {
         elementFace = elementFace.map(convert => convert.split(" "));
         let elementFaceResult = [];
         for(let i = 0; i < elementFace.length; i++){
-            elementFaceResult.push(parseInt(elementFace[i][0]));
-            elementFaceResult.push(parseInt(elementFace[i][1]));
-            elementFaceResult.push(parseInt(elementFace[i][2]));
+            for (let j = 0; j < 3; j++){
+                elementFaceResult.push(parseInt(elementFace[i][j]));
+                if(triangles[elementFace[i][j]] !== undefined){
+                    triangles[elementFace[i][j]].push([...elementFace[i]]);
+                }else{
+                    triangles[elementFace[i][j]] = [[...elementFace[i]]];
+                }
+            }
         }
         elementVertex = elementVertex.flat().map(parseFloat);
         vertices = new Float32Array(elementVertex);
@@ -116,7 +121,7 @@ MySample.main = (function() {
         console.log(indices)
         bufferAndShader();
     }
-    let theta = 0;
+    let theta = 5;
     async function update(elapsedTime) {
         let xzRotation = new Float32Array([
             Math.cos(theta), 0, Math.sin(theta), 0,
