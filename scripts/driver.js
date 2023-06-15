@@ -5,7 +5,7 @@ MySample.main = (function() {
     let previousTime = performance.now();
     let indices = [];
     let vertices = [];
-    let normals = [0, 0, 0];
+    let normals = [0, 0,];
     let result = [];
     let view = new Float32Array([
         1, 0, 0, 0,
