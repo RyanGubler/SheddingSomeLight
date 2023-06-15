@@ -5,40 +5,20 @@ MySample.main = (function() {
     let previousTime = performance.now();
     let indices = [];
     let vertices = [];
-    let normals = [];
-    let adjacent = [];
+    let normals = [0, 0, 0];
+    let result = [];
     let view = new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, 0,
+        0, 0, 1, -.3,
         0, 0, 0, 1
     ]);
-    let right = 1;
-    let left = -1;
-    let top = 1;
-    let bottom = -1;
+    let right = 3;
+    let left = -3;
+    let top = 3;
+    let bottom = -3;
     let near = 1;
     let far = 10;
-    let lAmbient = new Float32Array([
-        1,
-        0,
-        0
-    ]);
-    let lDiffuse = new Float32Array([
-        0,
-        1,
-        0
-    ]);
-    let mAmbient = new Float32Array([
-        1,
-        0,
-        0
-    ]);
-    let mDiffuse = new Float32Array([
-        0,
-        1,
-        0
-    ]);
     let translate1 = new Float32Array ([
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -101,31 +81,39 @@ MySample.main = (function() {
         requestAnimationFrame(animationLoop);
         
     }
-    async function loadFile(filename, splitData, elementFaceResult, verticeResult, adjacentFace){
+    async function loadFile(filename){
         let file = await loadFileFromServer(filename);
         let data = file.split("end_header");
         let elementVertex = data[1];
-        let elementFace = elementVertex.split(splitData).map(elementVertex => elementVertex + splitData);
-        elementVertex = elementFace[0].split(/\r?\n/);
-        elementVertex = elementVertex.map(stringData => {
-            let values = stringData.split(" ").slice(0, 3);
-            return values;
-        });
-        elementFace = elementFace[1].split(/\r?\n/);
-        elementFace.shift();
+        data = data[0].split(/\r?\n/);
+        // console.log(elementVertex)
+        let numberToSplice = data[3].split(" ");
+        numberToSplice = parseInt(numberToSplice[2]);
+        console.log(numberToSplice)
+        elementVertex = elementVertex.split(/\r?\n/);
+        elementVertex.shift();
+        elementVertex.pop();
+        // console.log(elementVertex)
+        let elementFace = elementVertex.slice(numberToSplice);
+        elementVertex = elementVertex.slice(0, numberToSplice);
         elementFace = elementFace.map(str => str.substring(2));
-        for (let i = 0; i < elementFace.length - 1; i++) {
-            for (let j = 0; j < 3; j++){
-                elementFaceResult.push(elementFace[i][j]);
-                if(adjacentFace[elementFace[i][j]] !== undefined){
-                    adjacentFace[elementFace[i][j]].push(...elementFace[i])
-                }else{
-                    adjacentFace[indices[i][j]] = [...indices[i]];
-                }
-            }
+        // console.log(elementFace);
+        elementVertex = elementVertex.map(stringData => {
+            let stuff = stringData.split(" ").slice(0, 3);
+            return stuff;
+        });
+        elementFace = elementFace.map(convert => convert.split(" "));
+        let elementFaceResult = [];
+        for(let i = 0; i < elementFace.length; i++){
+            elementFaceResult.push(parseInt(elementFace[i][0]));
+            elementFaceResult.push(parseInt(elementFace[i][1]));
+            elementFaceResult.push(parseInt(elementFace[i][2]));
         }
-        verticeResult = new Float32Array(elementVertex);
-        elementFaceResult = new Uint32Array(elementFaceResult);
+        elementVertex = elementVertex.flat().map(parseFloat);
+        vertices = new Float32Array(elementVertex);
+        indices = new Uint32Array(elementFaceResult);
+        console.log(vertices)
+        console.log(indices)
         bufferAndShader();
     }
     let theta = 0;
@@ -137,7 +125,6 @@ MySample.main = (function() {
             0, 0, 0, 1
         ]);
         theta += elapsedTime / 1000;
-
         model = xzRotation;
         let mProjection = gl.getUniformLocation(shaderProgram, "mProjection");
         gl.uniformMatrix4fv(mProjection, false, transposeMatrix4x4(perspectiveProjection));
@@ -171,5 +158,5 @@ MySample.main = (function() {
         requestAnimationFrame(animationLoop);
     }
     console.log('initializing...');
-    loadFile("models/buddha.ply", "-0.0043935 0.067325 0.046655", indices, vertices, adjacent)
+    loadFile("models/bunny.ply")
 }());
