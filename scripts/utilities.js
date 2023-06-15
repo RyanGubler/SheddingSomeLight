@@ -7,6 +7,10 @@
 //------------------------------------------------------------------
 async function loadFileFromServer(filename) {
     const res = await fetch(filename);
+    if (!res.ok) {
+        console.error(`Failed to load file: ${filename}. Status: ${res.status}`);
+        return;
+    }
     return await res.text();
 }
 

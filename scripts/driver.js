@@ -13,24 +13,25 @@ MySample.main = (function() {
         0, 0, 1, 0,
         0, 0, 0, 1
     ]);
-    let right = 3;
-    let left = -3;
-    let top = 3;
-    let bottom = -3;
+    let right = .25;
+    let left = -.25;
+    let top = .25;
+    let bottom = .25;
     let near = 1;
     let far = 10;
     let translate1 = new Float32Array ([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, -1,
+        0, 0, 1, -2,
         0, 0, 0, 1
     ]);
     let translate2 = new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
-        0, 0, 1, 1,
+        0, 0, 1, 0,
         0, 0, 0, 1
     ]);
+
     let perspectiveProjection = new Float32Array([
         near / right, 0, 0, 0,
         0, near / top, 0, 0,
@@ -77,27 +78,21 @@ MySample.main = (function() {
         let normal = gl.getAttribLocation(shaderProgram, 'aNormal');
         gl.enableVertexAttribArray(normal);
         gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, normals.BYTES_PER_ELEMENT * 3, 0);
-
         requestAnimationFrame(animationLoop);
-        
     }
     async function loadFile(filename){
         let file = await loadFileFromServer(filename);
         let data = file.split("end_header");
         let elementVertex = data[1];
         data = data[0].split(/\r?\n/);
-        // console.log(elementVertex)
         let numberToSplice = data[3].split(" ");
         numberToSplice = parseInt(numberToSplice[2]);
-        console.log(numberToSplice)
         elementVertex = elementVertex.split(/\r?\n/);
         elementVertex.shift();
         elementVertex.pop();
-        // console.log(elementVertex)
         let elementFace = elementVertex.slice(numberToSplice);
         elementVertex = elementVertex.slice(0, numberToSplice);
         elementFace = elementFace.map(str => str.substring(2));
-        // console.log(elementFace);
         elementVertex = elementVertex.map(stringData => {
             let stuff = stringData.split(" ").slice(0, 3);
             return stuff;
@@ -117,20 +112,30 @@ MySample.main = (function() {
         elementVertex = elementVertex.flat().map(parseFloat);
         vertices = new Float32Array(elementVertex);
         indices = new Uint32Array(elementFaceResult);
-        console.log(vertices)
-        console.log(indices)
         bufferAndShader();
     }
-    let theta = 5;
+
+    
+
+    let theta = 0;
+    let newFile = "models/bunny.ply"
     async function update(elapsedTime) {
+        if(theta <= 10){
+            newFile = "models/bunny.ply"
+        }else if(theta > 10 && theta <= 20){
+            newFile = "models/happy_vrip_res4.ply"
+        }else{
+            newFile = "models/bunny.ply";
+            theta =0
+        }
         let xzRotation = new Float32Array([
             Math.cos(theta), 0, Math.sin(theta), 0,
             0, 1, 0, 0,
             -Math.sin(theta), 0, Math.cos(theta), 0,
             0, 0, 0, 1
         ]);
+
         theta += elapsedTime / 1000;
-        model = xzRotation;
         let mProjection = gl.getUniformLocation(shaderProgram, "mProjection");
         gl.uniformMatrix4fv(mProjection, false, transposeMatrix4x4(perspectiveProjection));
         let mView = gl.getUniformLocation(shaderProgram, "mView");
@@ -163,5 +168,8 @@ MySample.main = (function() {
         requestAnimationFrame(animationLoop);
     }
     console.log('initializing...');
-    loadFile("models/bunny.ply")
+    
+    // loadFile("models/bunny.ply");
+    loadFile("models/happy_vrip_res4.ply");
+
 }());
